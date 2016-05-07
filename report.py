@@ -1,4 +1,9 @@
-### process summary reports from stackalytics output
+#!/usr/bin/env python
+### process summary reports from stackalytics & garret output
+
+# python-2 compatibility:
+from __future__ import print_function
+import sys
 
 import argparse
 import os
@@ -11,35 +16,25 @@ from time import sleep
 import configparser
 from jinja2 import Environment, PackageLoader, FileSystemLoader
 
-from dogpile.cache import make_region
 import requests
 
 # report.py
 
+# Python-2 compatibility: need to add unicode check:
+STRING_CHECK = (str, unicode) if sys.version_info.major<3 else (str)
+
+
 __version__ = '0.1'
-
-DEBUG = False
-
-DATETIME_FORMAT = '%Y-%m-%d %I%p UTC'
 
 # stackalytics.com is way faster than stackalytics.o.o
 LYTICS_API = 'http://stackalytics.com/api/1.0/activity'
 GARRET_API = 'https://review.openstack.org/changes/'
-
-# this is temporary or for test - normally will read from stackalytics API
-analytics_files = [
-        "sumant-2016.3-activity.json",
-        "yarko-2016.3-activity.json",
-        "lianhao-2016.3-activity.json",
-        "steve-2016.3-activity.json",
-        ]
 
 # default
 config_paths = [ ".", "~/.config/MSR"]
 
 
 def main():
-
     # id, users, field, Templates = read_config()
     cfg = read_config()
 
@@ -58,23 +53,8 @@ def main():
     summary["wip"] = len(wip)
 
     ###
-    # This will all be run, now, in the template renderer:
+    # This is run in the template renderer:
     ##
-    '''
-    print("Summary:")
-    for i in sumry:
-        print("{}:\t{}".format(i, sumry[i]))
-
-    print("\n\n--- Details ---")
-    for i in actions:
-        print("{} - {} ({}, {})".format(
-                i['type'],
-                i['review_status'],
-                i['user'],
-                i['company']) )
-        print(i['review_url'])
-        print("")
-    '''
     # TODO:  move to a function; option type (txt, html, docx)
     jinjaenv = Environment(loader=FileSystemLoader(cfg['Templates']['path']))
     template = jinjaenv.get_template(cfg['Templates']['template'])
@@ -152,7 +132,10 @@ def get_data_and_filename(usr, api_base, params,
 
     fpth = file_in_paths('.', data_path)
     if fpth:
-        os.makedirs(os.path.join(fpth, report_path), exist_ok=True)
+        fpth_report_path = os.path.join(fpth, report_path)
+        # doing it this way for python-2 compatibility:
+        if not os.path.exists(fpth_report_path):
+            os.makedirs(fpth_report_path)
     else:
         raise FileNotFoundError("None of your configured data paths exist;")
 
@@ -165,36 +148,39 @@ def get_data_and_filename(usr, api_base, params,
         #     from the first base in the path
         #   form api uri;
         #   hit api
-        if isinstance(params, str):
-            while(True):
-                s = requests.get(api_base + params)
-                break
+        if isinstance(params, STRING_CHECK):
+            for n in range(3):
+                try:
+                    s = requests.get(api_base + params)
+                except (requests.exceptions.Timeout,
+                        requests.exceptions.URLRequired) as e:
+                    sleep(3)
+                else:
+                    break
+            s.raise_for_status()
             # review api returns cruft/marker at the front:
             payload = json.loads(s.text.split('\n', 1)[1])
             for i in payload:
                 i['owner'].update({'gerrit_id': usr})
             # gerrit_id = None
         else:   # need to put a delay timer in these
-            while(True):
-                s = requests.get(api_base, params=params)
-                if not s.text.startswith('<HTML>'):
+            for n in range(3):
+                try:
+                    s = requests.get(api_base, params=params)
+                except (requests.exceptions.Timeout,
+                        requests.exceptions.URLRequired) as e:
+                    sleep(3)
+                else:
                     break
-                sleep(3)
+            s.raise_for_status()
             payload = s.json()
+
         data_fn = os.path.join(file_in_paths(report_path, data_path),
                           file_name(usr))
         #   store datafile into path;
         with open(data_fn, 'w') as f:
             yaml.dump(payload, f, default_flow_style=False)
-    '''
-    else:  # always need to refer to the gerrit id:
-        gerrit_id = usr  # best guess
-        with open(data_fn) as f:
-            payload = yaml.load(f)
-        if isinstance(payload, dict):
-            if 'activity' in payload and len(payload['activity'])>0:
-                gerrit_id = payload['activity'][0].get('gerrit_id', usr)
-    '''            
+
     return data_fn
 
 
@@ -212,7 +198,6 @@ def analytics_sources(cfg, start=None, end=None):
     data_path = cfg['Data']['path']
     # for each of the users in the project:
     for usr in cfg['Users']:
-        # TODO:  short circuit:
         params = {'start_date': epoch_value(start),
                   'end_date':   epoch_value(end),
                   'gerrit_id': usr}
@@ -223,21 +208,8 @@ def analytics_sources(cfg, start=None, end=None):
                                         data_path, ".open.yaml", start, end)
         yield (data_fn, open_fn)
 
-    '''
-    if getting from api's,
-    '''
-
-    '''
-    if getting from files,
-    '''
-    '''
-    if saving sources,
-    '''
 
 
-
-# TODO:  this reads json files manually gotten from API;
-#  modify to read from API directly;
 def process_analytic(data_file, fields):
 
     with open(data_file) as f:
@@ -249,6 +221,10 @@ def process_analytic(data_file, fields):
     for i in id_activity['activity']:
         # take required field aliases;
         # update w/ configured fields
+        if 'project' in fields:
+            key = fields['project']
+            if 'sandbox' in i.get(key, None):
+                continue
         act = {}
         for j in fields:
             # check for fields[j] == None
@@ -270,8 +246,10 @@ def process_pending(data_file, fields):
     for i in id_activity:
         # take required field aliases;
         # update w/ configured fields
-        if 'sandbox' in i['project']:
-            next
+        if 'project' in fields:
+            key = fields['project']
+            if 'sandbox' in i.get(key, None):
+                continue
         act = {}
         for j in fields:
             # check for fields[j] == None
@@ -335,5 +313,6 @@ def process_options():
     parser = MyArgParser(description=description)
 
 if __name__ == "__main__":
-    # eventually, parse args here
+    # eventually, parse args
     main()
+
