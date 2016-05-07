@@ -22,6 +22,7 @@ import requests
 
 # Python-2 compatibility: need to add unicode check:
 STRING_CHECK = (str, unicode) if sys.version_info.major<3 else (str)
+yaml_dump = yaml.safe_dump if sys.version_info.major<3 else yaml.dump
 
 
 __version__ = '0.1'
@@ -156,6 +157,7 @@ def get_data_and_filename(usr, api_base, params,
                 try:
                     s = requests.get(api_base + params)
                 except (requests.exceptions.Timeout,
+                        requests.exceptions.HTTPError,
                         requests.exceptions.URLRequired) as e:
                     sleep(3)
                 else:
@@ -171,6 +173,7 @@ def get_data_and_filename(usr, api_base, params,
                 try:
                     s = requests.get(api_base, params=params)
                 except (requests.exceptions.Timeout,
+                        requests.exceptions.HTTPError,
                         requests.exceptions.URLRequired) as e:
                     sleep(3)
                 else:
@@ -182,7 +185,7 @@ def get_data_and_filename(usr, api_base, params,
                           file_name(usr))
         #   store datafile into path;
         with open(data_fn, 'w') as f:
-            yaml.dump(payload, f, default_flow_style=False)
+            yaml_dump(payload, f, default_flow_style=False)
 
     return data_fn
 
