@@ -117,7 +117,7 @@ def get_data_and_filename(usr, api_base, params,
       - the report-
       - ...
 
-    find thier data file, and:
+    find their data file, and:
       - update if appropriate
       - return the updated file path
     '''
