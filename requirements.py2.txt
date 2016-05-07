@@ -1,0 +1,5 @@
+requests>=2.10.0
+PyYAML>=3.11
+Jinja2>=2.8
+## for python-2:
+configparser>=3.3.0.post2
