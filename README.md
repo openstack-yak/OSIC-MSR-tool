@@ -3,6 +3,7 @@
 OSIC MSR (monthly status report) reporting tool
 
 _This tool is in ALPHA state - use at your own risk (although there's probably not much risk)._
+It was written as a quick _hack_, so it could undoubtedly use cleanup.
 
 This was written using Python 3.5, and has been tested with Python 2.7.
 If you're (still) using python-2, then use the requirements.py2.txt file for dependencies.
@@ -13,6 +14,8 @@ If you're (still) using python-2, then use the requirements.py2.txt file for dep
  - create a virtualenv for this tool (recommended);
  - run `python -m pip install -U -r requirements.txt`
    - use the appropriate requirements file for your python version
+ - modify the config file, `msr.ini` for your group/uses.
+   - optionally, update / modify the template file to suit you.
  - make a `data` directory
    - alternately, you could make a `~/.config/MSR/data` directory
    
