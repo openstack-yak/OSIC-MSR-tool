@@ -73,4 +73,4 @@ If your data path base directory doesn't exist, it's an error, and `report.py` e
 - add option to roll-up data (e.g. from manageer collecting from multiple groups);
 - investigate collecting blueprint activity from launchpad;
   - [https://help.launchpad.net/API/launchpadlib]()
-
+- add an environment variable to set msr.ini file path
