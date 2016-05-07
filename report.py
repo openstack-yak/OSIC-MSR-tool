@@ -68,6 +68,9 @@ def read_config(file='msr.ini'):
     the config, as a by-section dictionary
     '''
 
+    fn = file_in_paths(file, config_paths)
+    if not fn:
+        raise RuntimeError("msr.ini file not found; expected in one of: {}".format(', '.join(config_paths)))
     # global id, users, fields
     config = configparser.ConfigParser(allow_no_value=True)
     config.read(file)
