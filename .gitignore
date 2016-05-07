@@ -1,0 +1,6 @@
+*.swp
+data/*
+*.wpr
+*.wpu
+*.url
+x0*

@@ -1,0 +1,5 @@
+dogpile.cache>=0.5.7
+dogpile.core>=0.4.1
+requests>=2.10.0
+PyYAML>=3.11
+Jinja2>=2.8

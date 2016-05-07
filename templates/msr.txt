@@ -1,0 +1,47 @@
+{#  A jinj2 text template for OSIC MSR reporting #}
+Summary:
+
+Paragraph form please.  This is a good spot to give overall summary, summit advocacy success/failures, and big ticket items that were completed (or made significant progress).  Links within the paragraph where it makes sense.
+
+Highlights:
+
+Bullet form is ok here.
+Name the best things that happened (the highlights).
+
+Lowlights:
+
+Bullet form is ok here.
+Name the worst things that happened (the lowlights).
+Contributions:
+
+{% for i in summary %}
+    {{ "{:>18s}: {:3d}".format(i, summary[i]) }}
+{% endfor %}
+
+{#
+Bug Fixes - 5 (1 Fixed, 4 WIP)
+Bugs Filed – 11
+Reviews – 40
+Patch sets – 84
+Completed Blue Prints - 4
+Work in progress (WIP) - 17
+ #}
+
+The details:
+
+{% for i in actions %}
+    {{ i.project }}
+    {{ i.type }} -  {{ i.review_status }} ({{ i.user }}, {{ i.company }})
+    {{ i.review_url }}
+    {{ i.subject }}
+{% endfor %}
+
+Open items:
+
+{% for i in wip %}
+    {{ i.project }} / {{ i.owner.gerrit_id }}
+    updated: {{ i.updated }} / created: {{ i.created }}
+    project: {{ i.project }} / topic:  {{ i.topic }}
+    subject: {{ i.subject }}
+    https://review.openstack.org/#/c/{{ i.review_number }}
+{% endfor %}
