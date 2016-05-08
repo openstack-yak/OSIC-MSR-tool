@@ -153,7 +153,7 @@ def get_data_and_filename(usr, api_base, params,
         #   form api uri;
         #   hit api
         if isinstance(params, STRING_CHECK):
-            for n in range(3):
+            for n in range(5):
                 try:
                     s = requests.get(api_base + params)
                 except (requests.exceptions.Timeout,
@@ -169,7 +169,7 @@ def get_data_and_filename(usr, api_base, params,
                 i['owner'].update({'gerrit_id': usr})
             # gerrit_id = None
         else:   # need to put a delay timer in these
-            for n in range(3):
+            for n in range(5):
                 try:
                     s = requests.get(api_base, params=params)
                 except (requests.exceptions.Timeout,
