@@ -1,4 +1,4 @@
-**STATUS**:  Don't use this tool;  it's currently not in working condition (may take a stackalytics api fix);
+**STATUS**:  *Don't use this tool!*  It's currently not in working condition (may take a stackalytics api fix);
 
 # OSIC-MSR-tool
 
