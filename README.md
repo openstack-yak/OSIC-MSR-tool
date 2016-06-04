@@ -1,6 +1,6 @@
 **STATUS**:  *Don't use this tool yet!*
 
-    It's currently not in working condition (may take a stackalytics api fix);
+    It's currently not in working condition (may take a stackalytics api fix, or maybe web scraping might be easier);
 
 # OSIC-MSR-tool
 
